@@ -57,27 +57,34 @@ if(argv.filter || argv.f) {
   }
 }
 
-var wait = false
-
 var dirLen = dirs.length
-var skip = dirLen - 1
+var ctx = {
+  wait: false,
+  skip: dirLen - 1
+}	
 for(i = 0; i < dirLen; i++) {
   var dir = dirs[i]
   console.error('> Watching', dir)
   watch.watchTree(dir, watchTreeOpts, function (f, curr, prev) {
-    if(skip) {
-        skip--
+    if(ctx.skip) {
+        ctx.skip--
         return
     }
-    if(wait) return
-
+    if(ctx.wait) {
+	console.log('wait');
+	return
+    }
+ 
+    ctx.wait = true;
+    console.log('run');
     execshell(command)
 
     if(waitTime > 0) {
-      wait = true
       setTimeout(function () {
-        wait = false
+        ctx.wait = false
       }, waitTime * 1000)
+    } else {
+      ctx.wait = false;
     }
   })
 }
